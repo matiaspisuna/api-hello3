@@ -1,0 +1,44 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Install dependencies
+# Usamos 'npm ci' que es más rápido y seguro para entornos de CI
+      run: npm ci
+
+    - name: Build project
+      run: npm run build
+
+    - name: Run tests
+      run: npm test
+
+# Opcional: Ejecutar análisis de SonarQube
+# Nota: Esto requiere que el servidor de Sonar sea accesible y se configure un token.
+    - name: Run SonarQube Analysis
+      run: npm run sonar
+      continue-on-error: true # Lo marcamos para que no detenga el pipeline si falla la conexión
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+    - name: Say Hello
+      run: echo "Hello"
+    
